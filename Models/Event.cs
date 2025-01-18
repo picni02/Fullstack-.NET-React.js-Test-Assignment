@@ -12,8 +12,7 @@ namespace ResidentManagementSystem.Models
         public DateTime EventTime { get; set; }
         public int ResidentId { get; set; }
         public string EventType { get; set; } // Entry/Exit
-        public string ApartmentNumber { get; set; }
+        public int ApartmentId { get; set; }
 
-        public Resident Resident { get; set; }
     }
 }

@@ -56,7 +56,7 @@ namespace ResidentManagementSystem.Modules
                 if (newResident.LastName == null)
                     newResident.LastName = string.Empty; // Ako je null, postavi praznu vrijednost
 
-                // Provjeri i konvertuj bool vrijednost
+                // Provjera i konverzija bool vrijednosti
                 if (parameters.IsInside != null)
                     newResident.IsInside = Convert.ToBoolean(parameters.IsInside);
 
@@ -73,29 +73,23 @@ namespace ResidentManagementSystem.Modules
             {
                 int id = parameters.ResidentId;
 
-                // Pronađi postojećeg rezidenta u bazi
                 Resident resident = _dbContext.Residents.FirstOrDefault(r => r.ResidentId == id);
                 if (resident == null)
                     return HttpStatusCode.NotFound;
 
-                // Bind dolaznih podataka iz JSON tijela
                 var updatedResident = this.Bind<Resident>();
 
-                // Ažuriraj samo one atribute koji nisu null
                 if (!string.IsNullOrEmpty(updatedResident.FirstName))
                     resident.FirstName = updatedResident.FirstName;
 
                 if (!string.IsNullOrEmpty(updatedResident.LastName))
                     resident.LastName = updatedResident.LastName;
 
-                // Ažuriraj IsInside samo ako je proslijeđen u JSON-u
                 if (updatedResident.IsInside != resident.IsInside)
                     resident.IsInside = updatedResident.IsInside;
 
-                // Spremi promjene u bazi
                 _dbContext.SaveChanges();
 
-                // Vrati ažuriranog rezidenta
                 return Response.AsJson(resident);
             });
 

@@ -9,6 +9,8 @@ namespace ResidentManagementSystem.Data
     {
         public DbSet<Resident> Residents { get; set; }
         public DbSet<Event> Events { get; set; }
+        public DbSet<Apartment> Apartments { get; set; }
+        public DbSet<ResidentApartment> ResidentApartments { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -17,5 +19,38 @@ namespace ResidentManagementSystem.Data
                 options => options.EnableRetryOnFailure()
             ) ;
         }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            // ResidentApartment: Composite Key
+            modelBuilder.Entity<ResidentApartment>()
+                .HasKey(ra => new { ra.ResidentId, ra.ApartmentId });
+
+            modelBuilder.Entity<ResidentApartment>()
+                .HasOne(ra => ra.Resident)
+                .WithMany(r => r.ResidentApartments)
+                .HasForeignKey(ra => ra.ResidentId);
+
+            modelBuilder.Entity<ResidentApartment>()
+                .HasOne(ra => ra.Apartment)
+                .WithMany(a => a.ResidentApartments)
+                .HasForeignKey(ra => ra.ApartmentId);
+
+            // Event: Foreign Key to Apartment
+            //modelBuilder.Entity<Event>()
+            //    .HasOne(e => e.Apartment)
+            //    .WithMany()
+            //    .HasForeignKey(e => e.ApartmentId)
+            //    .OnDelete(DeleteBehavior.Restrict);
+
+            // Event: Foreign Key to Resident
+            //modelBuilder.Entity<Event>()
+            //    .HasOne(e => e.Resident)
+            //    .WithMany()
+            //    .HasForeignKey(e => e.ResidentId);
+        }
+
     }
 }

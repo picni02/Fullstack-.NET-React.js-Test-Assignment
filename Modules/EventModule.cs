@@ -13,7 +13,8 @@ namespace ResidentManagementSystem.Modules
     public class EventModule : NancyModule
     {
         private readonly AppDbContext _dbContext;
-        public EventModule(AppDbContext dbContext) : base("/events")
+        private readonly AccessObserver _accessObserver;
+        public EventModule(AppDbContext dbContext, AccessObserver accessObserver) : base("/events")
         {
 
             //Post("/", args =>
@@ -36,8 +37,9 @@ namespace ResidentManagementSystem.Modules
             //});
 
             _dbContext = dbContext;
+            _accessObserver = accessObserver;
 
-            // GET all residents
+            // GET all events
             Get("/", _ =>
             {
 
@@ -48,12 +50,12 @@ namespace ResidentManagementSystem.Modules
                     EventTime = e.EventTime,
                     ResidentId = e.ResidentId,
                     EventType = e.EventType,
-                    ApartmentNumber = e.ApartmentNumber,
+                    ApartmentId = e.ApartmentId,
                 }).ToList();
                 return Response.AsJson(events);
             });
 
-            // GET a resident by id
+            // GET a event by id
             Get("/{EventId:int}", parameters =>
             {
                 int id = parameters.EventId;
@@ -67,26 +69,59 @@ namespace ResidentManagementSystem.Modules
             // POST add event
             Post("/", parameters =>
             {
-
+                
                 Event newEvent = this.Bind<Event>();
 
-                // Provjeri ako su stringovi u redu
+                var resident = _dbContext.Residents.Find(newEvent.ResidentId);
+                var apartment = _dbContext.Apartments.Find(newEvent.ApartmentId);
+
+                if (resident == null || apartment == null)
+                {
+                    return Response.AsJson(new { error = "Resident or Apartment not found." }, HttpStatusCode.NotFound);
+                }
+
+                // Provjera ako je newEvent null
+                if (newEvent == null)
+                {
+                    return Response.AsJson(new { error = "Invalid event data" }, HttpStatusCode.BadRequest);
+                }
+
+                // Provjera validnosti unosa i postavljanje zadane vrijednosti ako su null
                 if (newEvent.EventTime == default)
-                    newEvent.EventTime = DateTime.Now; // Ako je null, postavi praznu vrijednost
+                        newEvent.EventTime = DateTime.Now;
 
-                if (newEvent.EventType == null)
-                    newEvent.EventType = "EXIT"; // Ako je null, postavi praznu vrijednost
+                if (string.IsNullOrEmpty(newEvent.EventType))
+                        newEvent.EventType = "EXIT";
+                try
+                {
+                    // Provjera pristupa prije dodavanja događaja
+                    _accessObserver.CheckAccess(newEvent);
 
-                if (newEvent.ApartmentNumber == null)
-                    newEvent.ApartmentNumber = "Unknown";
+                    Console.WriteLine($"Event Time: {newEvent.EventTime}, Resident Id: {newEvent.ResidentId}, Event Type: {newEvent.EventType}, Apartment Id: {newEvent.ApartmentId}");
 
-                Console.WriteLine($"Event Time: {newEvent.EventTime}, Resident Id: {newEvent.ResidentId}, Event Type: {newEvent.EventType}, Apartment Number: {newEvent.ApartmentNumber}");
+                    _dbContext.Events.Add(newEvent);
 
+                    if (newEvent.EventType == "ENTRY")
+                    {
+                        resident.IsInside = true; // Ako je ENTRY, postavi IsInside na true (1)
+                    }
+                    else if (newEvent.EventType == "EXIT")
+                    {
+                        resident.IsInside = false; // Ako je EXIT, postavi IsInside na false (0)
+                    }
 
-                _dbContext.Events.Add(newEvent);
-                _dbContext.SaveChanges();
-                return Response.AsJson(newEvent, HttpStatusCode.Created);
+                    _dbContext.SaveChanges();
+
+                    return Response.AsJson(newEvent, HttpStatusCode.Created);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error: {ex.Message}");
+                    Console.WriteLine($"Inner Exception: {ex.InnerException?.Message}");
+                    return Response.AsJson(new { error = ex.Message }, HttpStatusCode.Forbidden);
+                }
             });
+
 
             // PUT update event
             Put("/{EventId:int}", parameters =>
@@ -108,8 +143,8 @@ namespace ResidentManagementSystem.Modules
                 if (!string.IsNullOrEmpty(updatedEvent.EventType))
                     existingEvent.EventType = updatedEvent.EventType;
 
-                if (!string.IsNullOrEmpty(updatedEvent.ApartmentNumber))
-                    existingEvent.ApartmentNumber = updatedEvent.ApartmentNumber;
+                if (updatedEvent.ApartmentId > 0)
+                    existingEvent.ApartmentId = updatedEvent.ApartmentId;
 
                 if (updatedEvent.ResidentId > 0)
                     existingEvent.ResidentId = updatedEvent.ResidentId;

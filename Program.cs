@@ -36,8 +36,8 @@ class Program
             Console.WriteLine($"Greška: {response.OriginalException.Message}");
         }
 
-        var dataTransferService = new DataTransferService(new AppDbContext());
-        await dataTransferService.TransferResidentsAndEventsToElasticSearch();
+       // var dataTransferService = new DataTransferService(new AppDbContext());
+       // await dataTransferService.TransferResidentsAndEventsToElasticSearch();
 
 
     }

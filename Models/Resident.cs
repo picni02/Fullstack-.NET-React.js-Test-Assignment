@@ -12,13 +12,9 @@ namespace ResidentManagementSystem.Models
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public bool IsInside { get; set; }
-    }
 
-    public class ResidentDB
-    {
-        public int ResidentId { get; set; }
-        public string FirstName { get; set; }
-        public string LastName { get; set; }
-        public int IsInside { get; set; }
+        public ICollection<ResidentApartment> ResidentApartments { get; set; }
+       // public ResidentApartment ResidentApartment { get; set; }
     }
+    
 }

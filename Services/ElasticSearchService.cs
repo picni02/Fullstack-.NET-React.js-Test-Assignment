@@ -12,12 +12,12 @@ namespace ResidentManagementSystem.Services
 
         public ElasticSearchService()
         {
-            var settings = new ConnectionSettings(new Uri("http://localhost:9200")) // URL for your Elasticsearch instance
-                .DefaultIndex("residents"); // Default index is residents, but you can change it dynamically
+            var settings = new ConnectionSettings(new Uri("http://localhost:9200")) // URL for Elasticsearch instance
+                .DefaultIndex("residents"); // Default index is residents
 
             _client = new ElasticClient(settings);
 
-            // Provjera konekcije
+            // Connection check
             var pingResponse = _client.Ping();
             if (!pingResponse.IsValid)
             {
@@ -34,7 +34,6 @@ namespace ResidentManagementSystem.Services
         // Resident CRUD operations
         public static void IndexResident(Resident resident)
         {
-            // Postavite indeks specifičan za residente
             var indexResident = _client.Index(resident, idx => idx.Index("residents"));
             if (!indexResident.IsValid)
             {
@@ -44,14 +43,12 @@ namespace ResidentManagementSystem.Services
 
         public static Resident GetResidentById(int id)
         {
-            // Postavite indeks specifičan za residente
             var searchResponse = _client.Get<Resident>(id, idx => idx.Index("residents"));
             return searchResponse.IsValid ? searchResponse.Source : null;
         }
 
         public static void DeleteResidentById(int id)
         {
-            // Postavite indeks specifičan za residente
             var deleteResponse = _client.Delete<Resident>(id, idx => idx.Index("residents"));
             if (!deleteResponse.IsValid)
             {
@@ -62,7 +59,6 @@ namespace ResidentManagementSystem.Services
         // Event CRUD operations
         public static void IndexEvent(Event residentEvent)
         {
-            // Postavite indeks specifičan za evente
             var indexResponse = _client.Index(residentEvent, idx => idx.Index("events"));
             if (!indexResponse.IsValid)
             {
@@ -72,7 +68,6 @@ namespace ResidentManagementSystem.Services
 
         public static List<Event> GetEventsByResidentId(int residentId)
         {
-            // Postavite indeks specifičan za evente
             var searchResponse = _client.Search<Event>(s => s
                 .Index("events")
                 .Query(q => q
@@ -85,7 +80,6 @@ namespace ResidentManagementSystem.Services
 
         public static void DeleteEventById(int eventId)
         {
-            // Postavite indeks specifičan za evente
             var deleteResponse = _client.Delete<Event>(eventId, idx => idx.Index("events"));
             if (!deleteResponse.IsValid)
             {

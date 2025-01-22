@@ -17,25 +17,6 @@ namespace ResidentManagementSystem.Modules
         public EventModule(AppDbContext dbContext, AccessObserver accessObserver) : base("/events")
         {
 
-            //Post("/", args =>
-            //{
-            //    var residentEvent = this.Bind<Event>();
-            //    ElasticSearchService.IndexEvent(residentEvent);
-            //    return Response.AsJson(residentEvent, HttpStatusCode.Created);
-            //});
-
-            //Get("/{ResidentId:int}", args =>
-            //{
-            //    List<Event> events = ElasticSearchService.GetEventsByResidentId(args.ResidentId);
-            //    return Response.AsJson(events);
-            //});
-
-            //Delete("/{EventId:int}", args =>
-            //{
-            //    ElasticSearchService.DeleteEventById(args.EventId);
-            //    return HttpStatusCode.NoContent;
-            //});
-
             _dbContext = dbContext;
             _accessObserver = accessObserver;
 
@@ -80,13 +61,12 @@ namespace ResidentManagementSystem.Modules
                     return Response.AsJson(new { error = "Resident or Apartment not found." }, HttpStatusCode.NotFound);
                 }
 
-                // Provjera ako je newEvent null
                 if (newEvent == null)
                 {
                     return Response.AsJson(new { error = "Invalid event data" }, HttpStatusCode.BadRequest);
                 }
 
-                // Provjera validnosti unosa i postavljanje zadane vrijednosti ako su null
+                
                 if (newEvent.EventTime == default)
                         newEvent.EventTime = DateTime.Now;
 
@@ -94,7 +74,7 @@ namespace ResidentManagementSystem.Modules
                         newEvent.EventType = "EXIT";
                 try
                 {
-                    // Provjera pristupa prije dodavanja događaja
+                    
                     _accessObserver.CheckAccess(newEvent);
 
                     Console.WriteLine($"Event Time: {newEvent.EventTime}, Resident Id: {newEvent.ResidentId}, Event Type: {newEvent.EventType}, Apartment Id: {newEvent.ApartmentId}");
@@ -103,11 +83,11 @@ namespace ResidentManagementSystem.Modules
 
                     if (newEvent.EventType == "ENTRY")
                     {
-                        resident.IsInside = true; // Ako je ENTRY, postavi IsInside na true (1)
+                        resident.IsInside = true; // Ako je ENTRY, postavljanje IsInside na true (1)
                     }
                     else if (newEvent.EventType == "EXIT")
                     {
-                        resident.IsInside = false; // Ako je EXIT, postavi IsInside na false (0)
+                        resident.IsInside = false; // Ako je EXIT, postavljanje IsInside na false (0)
                     }
 
                     _dbContext.SaveChanges();
@@ -128,15 +108,15 @@ namespace ResidentManagementSystem.Modules
             {
                 int id = parameters.EventId;
 
-                // Pronađi postojeći event u bazi
+              
                 Event existingEvent = _dbContext.Events.FirstOrDefault(e => e.EventId == id);
                 if (existingEvent == null)
                     return HttpStatusCode.NotFound;
 
-                // Bind dolaznih podataka iz JSON tijela
+               
                 var updatedEvent = this.Bind<Event>();
 
-                // Ažuriraj samo one atribute koji nisu null ili zadani
+                
                 if (updatedEvent.EventTime != default)
                     existingEvent.EventTime = updatedEvent.EventTime;
 
@@ -151,7 +131,7 @@ namespace ResidentManagementSystem.Modules
 
                 _dbContext.SaveChanges();
 
-                // Vrati ažurirani event
+             
                 return Response.AsJson(existingEvent);
             });
 

@@ -49,14 +49,12 @@ namespace ResidentManagementSystem.Modules
 
                 Resident newResident = this.Bind<Resident>();
 
-                // Provjeri ako su stringovi u redu
                 if (newResident.FirstName == null)
-                    newResident.FirstName = string.Empty; // Ako je null, postavi praznu vrijednost
+                    newResident.FirstName = string.Empty; 
 
                 if (newResident.LastName == null)
-                    newResident.LastName = string.Empty; // Ako je null, postavi praznu vrijednost
+                    newResident.LastName = string.Empty; 
 
-                // Provjera i konverzija bool vrijednosti
                 if (parameters.IsInside != null)
                     newResident.IsInside = Convert.ToBoolean(parameters.IsInside);
 

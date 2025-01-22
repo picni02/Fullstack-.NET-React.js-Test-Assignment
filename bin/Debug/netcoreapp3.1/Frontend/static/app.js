@@ -21,3 +21,22 @@ document.getElementById("generate-data-btn").addEventListener("click", function 
         });
 });
 
+document.getElementById("generateDataButton").addEventListener("click", async function () {
+    try {
+        const response = await fetch("http://localhost:5000/generate-data", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            }
+        });
+
+        const data = await response.json();
+        if (response.ok) {
+            alert(data.message);
+        } else {
+            alert(`Error: ${data.error}`);
+        }
+    } catch (error) {
+        alert("An error occurred: " + error.message);
+    }
+});

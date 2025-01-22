@@ -14,7 +14,7 @@ namespace ResidentManagementSystem.Models
         public bool IsInside { get; set; }
 
         public ICollection<ResidentApartment> ResidentApartments { get; set; }
-       // public ResidentApartment ResidentApartment { get; set; }
+
     }
     
 }

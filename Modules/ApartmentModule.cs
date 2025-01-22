@@ -47,12 +47,12 @@ namespace ResidentManagementSystem.Modules
 
                 Apartment newApartment = this.Bind<Apartment>();
 
-                // Provjeri ako su stringovi u redu
+              
                 if (newApartment.ApartmentNumber == null)
-                    newApartment.ApartmentNumber = "A100"; // Ako je null, postavi praznu vrijednost
+                    newApartment.ApartmentNumber = "A100"; 
 
                 if (newApartment.Address == null)
-                    newApartment.Address = "street"; // Ako je null, postavi praznu vrijednost
+                    newApartment.Address = "Ulica Kralja Tvrtka"; 
 
                 Console.WriteLine($"Apartment Number: {newApartment.ApartmentNumber}, Address: {newApartment.Address}");
 
@@ -67,15 +67,14 @@ namespace ResidentManagementSystem.Modules
             {
                 int id = parameters.ApartmentId;
 
-                // Pronađi postojeći apartment u bazi
                 Apartment existingApartment = _dbContext.Apartments.FirstOrDefault(a => a.ApartmentId == id);
                 if (existingApartment == null)
                     return HttpStatusCode.NotFound;
 
-                // Bind dolaznih podataka iz JSON tijela
+              
                 var updatedApartment = this.Bind<Apartment>();
 
-                // Ažuriraj samo one atribute koji nisu null ili zadani
+                
                 if (!string.IsNullOrEmpty(updatedApartment.ApartmentNumber))
                     existingApartment.Address = updatedApartment.Address;
 
@@ -84,7 +83,7 @@ namespace ResidentManagementSystem.Modules
 
                 _dbContext.SaveChanges();
 
-                // Vrati ažurirani event
+                
                 return Response.AsJson(existingApartment);
             });
 

@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Pomelo.EntityFrameworkCore.MySql;
+// using Pomelo.EntityFrameworkCore.MySql;
 using ResidentManagementSystem.Models;
 using System;
 
@@ -14,9 +14,8 @@ namespace ResidentManagementSystem.Data
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseMySql(
-                "Server=127.0.0.1;Port=3310;Database=residentmanagementdb;User=root;Password=root;",
-                options => options.EnableRetryOnFailure()
+            optionsBuilder.UseMySQL(
+                "Server=127.0.0.1;Port=3310;Database=residentmanagementdb;User=root;Password=root;"
             ) ;
         }
 
@@ -24,7 +23,7 @@ namespace ResidentManagementSystem.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            // ResidentApartment: Composite Key
+            // ResidentApartment (gerund): Kompozitni ključ 
             modelBuilder.Entity<ResidentApartment>()
                 .HasKey(ra => new { ra.ResidentId, ra.ApartmentId });
 

@@ -43,7 +43,7 @@ namespace ResidentManagementSystem.Services
         public async Task TransferData()
         {
             Console.WriteLine("Starting data transfer to Elasticsearch...");
-            var batchSize = 500;
+            var batchSize = 10000;
 
             var totalResidents = _appDbContext.Residents.Count();
             for(int i = 0; i < totalResidents; i+=batchSize)
@@ -89,14 +89,14 @@ namespace ResidentManagementSystem.Services
 
             Console.WriteLine("Resident-Apartments data transferred.");
 
-
+            const int eventBatchSize = 50000;
             var totalEvents = _appDbContext.Events.Count();
-            for (int i = 0; i < totalEvents; i += batchSize)
+            for (int i = 0; i < totalEvents; i += eventBatchSize)
             {
                 var eventsBatch = _appDbContext.Events
                     .AsNoTracking()
                     .Skip(i)
-                    .Take(batchSize)
+                    .Take(eventBatchSize)
                     .ToList();
 
                 await ElasticSearchService.BulkIndexEventsAsync(eventsBatch);
@@ -104,45 +104,25 @@ namespace ResidentManagementSystem.Services
 
             Console.WriteLine("Events data transferred.");
 
-         //   _appDbContext.Residents.RemoveRange(residents);
-         //   _appDbContext.Apartments.RemoveRange(apartments);
+            const int deleteBatchSize = 1000;
 
-         //   await _appDbContext.SaveChangesAsync();
-
-            for (int i = 0; i < totalResidents; i += batchSize)
+            for (int i = 0; i < totalResidents; i += deleteBatchSize)
             {
-                var batchToRemove = _appDbContext.Residents.AsNoTracking().Take(batchSize).ToList();
+                var batchToRemove = _appDbContext.Residents.AsNoTracking().Take(deleteBatchSize).ToList();
                 _appDbContext.Residents.RemoveRange(batchToRemove);
                 await _appDbContext.SaveChangesAsync();
             }
-
-            for (int i = 0; i < totalApartments; i += batchSize)
+            Console.WriteLine("Resident data removed from MariaDB.");
+            for (int i = 0; i < totalApartments; i += deleteBatchSize)
             {
-                var batchToRemove = _appDbContext.Apartments.AsNoTracking().Take(batchSize).ToList();
+                var batchToRemove = _appDbContext.Apartments.AsNoTracking().Take(deleteBatchSize).ToList();
                 _appDbContext.Apartments.RemoveRange(batchToRemove);
                 await _appDbContext.SaveChangesAsync();
             }
+            Console.WriteLine("Apartment data removed from MariaDB.");
 
             Console.WriteLine("Data transfer completed successfully.");
         }
 
-        public async Task TransferResidentsAndEventsToElasticSearch()
-        {
-            var residents = _appDbContext.Residents.ToList();
-            foreach (var res in residents)
-            {
-                ElasticSearchService.IndexResident(res);
-            }
-
-            var events = _appDbContext.Events.ToList();
-            foreach(var e in events)
-            {
-                ElasticSearchService.IndexEvent(e);
-            }
-
-            _appDbContext.Residents.RemoveRange(residents);
-            _appDbContext.Events.RemoveRange(events);
-            await _appDbContext.SaveChangesAsync();
-        }
     }
 }

@@ -14,10 +14,12 @@ namespace ResidentManagementSystem.Data
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseMySQL(
+            optionsBuilder.UseMySql(
                 "Server=127.0.0.1;Port=3310;Database=residentmanagementdb;User=root;Password=root;"
             ) ;
         }
+
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

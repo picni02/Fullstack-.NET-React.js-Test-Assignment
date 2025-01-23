@@ -40,6 +40,9 @@ namespace ResidentManagementSystem.Services
             if (!existsResponse.Exists)
             {
                 var createIndexResponse = _client.Indices.Create("residents", c => c
+                    .Settings(s => s
+                        .Setting("index.max_result_window", 100000)                        
+                    )
                     .Map(m => m
                         .Properties(p => p
                             .Number(n => n.Name("residentId"))
@@ -67,6 +70,9 @@ namespace ResidentManagementSystem.Services
             if (!existsResponse.Exists)
             {
                 var createIndexResponse = _client.Indices.Create("events", c => c
+                    .Settings(s => s
+                        .Setting("index.max_result_window", 1000000)
+                    )
                     .Map(m => m
                         .Properties(p => p
                             .Number(n => n.Name("eventId"))
@@ -95,6 +101,9 @@ namespace ResidentManagementSystem.Services
             if (!existsResponse.Exists)
             {
                 var createIndexResponse = _client.Indices.Create("apartments", c => c
+                    .Settings(s => s
+                        .Setting("index.max_result_window", 100000)
+                    )
                     .Map(m => m
                         .Properties(p => p
                             .Number(n => n.Name("apartmentId"))
@@ -121,6 +130,9 @@ namespace ResidentManagementSystem.Services
             if (!existsResponse.Exists)
             {
                 var createIndexResponse = _client.Indices.Create("residentapartments", c => c
+                    .Settings(s => s
+                        .Setting("index.max_result_window", 100000)
+                    )
                     .Map(m => m
                         .Properties(p => p
                             .Number(n => n.Name("residentId"))
@@ -157,39 +169,28 @@ namespace ResidentManagementSystem.Services
 
         public static async Task BulkIndexResidentsAsync(IEnumerable<Resident> residents)
         {
-            var batchSize = 10000;
-            var residentList = residents.ToList();
-            var totalBatches = (int)Math.Ceiling((double)residentList.Count / batchSize);
-            
-            for(int i=0; i < totalBatches; i++)
+            var bulkRequest = new BulkDescriptor();
+
+            foreach (var resident in residents)
             {
-                var batch = residentList.Skip(i* batchSize).Take(batchSize);
-
-                var bulkRequest = new BulkDescriptor();
-
-                foreach (var resident in batch)
-                {
-                    bulkRequest.Index<Resident>(op => op
-                        .Index("residents")
-                        .Document(resident));
-                }
-
-                var bulkResponse = await _client.BulkAsync(bulkRequest);
-
-                if (bulkResponse.Errors)
-                {
-                    foreach (var itemWithError in bulkResponse.ItemsWithErrors)
-                    {
-                        Console.WriteLine($"Failed to index resident with ID {itemWithError.Id}: {itemWithError.Error.Reason}");
-                    }
-                }
-                else
-                {
-                    Console.WriteLine($"Successfully indexed {i + 1}/{totalBatches} residents.");
-                }
+                bulkRequest.Index<Resident>(op => op
+                    .Index("residents")
+                    .Document(resident));
             }
 
-            
+            var bulkResponse = await _client.BulkAsync(bulkRequest);
+
+            if (bulkResponse.Errors)
+            {
+                foreach (var itemWithError in bulkResponse.ItemsWithErrors)
+                {
+                    Console.WriteLine($"Failed to index resident with ID {itemWithError.Id}: {itemWithError.Error.Reason}");
+                }
+            }
+            else
+            {
+                Console.WriteLine($"Successfully indexed {residents.Count()} residents.");
+            }
         }
 
 

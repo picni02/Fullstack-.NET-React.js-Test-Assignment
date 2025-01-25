@@ -12,12 +12,10 @@ namespace ResidentManagementSystem.Services
     public class DataTransferService
     {
         private readonly AppDbContext _appDbContext;
-        private readonly ElasticClient _elasticClient;
         private readonly System.Timers.Timer _timer;
         public DataTransferService(AppDbContext appDbContext, ElasticSearchService elasticSearchService) 
         {
             _appDbContext = appDbContext;
-            _elasticClient = elasticSearchService.GetClient();
 
             _timer = new System.Timers.Timer(GetTimeUntilNextMonday());
             _timer.Elapsed += async (sender, e) => await TransferData();

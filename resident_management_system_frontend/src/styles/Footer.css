@@ -1,0 +1,34 @@
+.footer {
+    background: #545454;
+    color: #fff;
+    text-align: center;
+    position: fixed;
+    width: 100%;
+    bottom: 0;
+    padding-top: 20px;
+    padding-bottom: 10px;
+}
+
+
+.footer__link-title {
+    color: var(--heading-color);
+    margin-bottom: 1rem;
+}
+
+
+.footer__quick-links li a {
+    text-decoration: none;
+    color: var(--text-color);
+    font-size: 1.1rem;
+}
+
+.footer__quick-links h6 span i {
+    color: var(--secondary-color);
+    font-size: 1.1rem;
+}
+
+.copyright {
+    color: var(--text-color);
+    font-size: 1rem;
+    
+}

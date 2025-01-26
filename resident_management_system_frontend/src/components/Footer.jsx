@@ -44,9 +44,7 @@ const Footer = () => {
               <ListGroupItem className='ps-3 border-0 d-flex align-items-center gap-3'>
                 <h6 className='mb-0 d-flex align-items-center gap-2'>
                   <b><i class='ri-phone-fill'>Broj telefona:</i></b>
-                  
                 </h6>
-
                 <p className='mb-0'>+38762015130</p>
               </ListGroupItem>
             </ListGroup>

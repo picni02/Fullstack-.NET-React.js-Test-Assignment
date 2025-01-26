@@ -2,11 +2,11 @@
     background: #545454;
     color: #fff;
     text-align: center;
-    position: fixed;
     width: 100%;
     bottom: 0;
     padding-top: 20px;
     padding-bottom: 10px;
+    margin-top: 25px;
 }
 
 

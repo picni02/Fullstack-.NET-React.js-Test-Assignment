@@ -22,7 +22,7 @@ namespace ResidentManagementSystem.Services
             if (!pingResponse.IsValid)
             {
                 Console.WriteLine($"Elasticsearch is not available: {pingResponse.DebugInformation}");
-                throw new Exception("Error connecting with Elasticsearch");
+              //  throw new Exception("Error connecting with Elasticsearch");
             }
         }
 

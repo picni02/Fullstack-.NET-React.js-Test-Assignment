@@ -49,7 +49,7 @@ const Footer = () => {
               </ListGroupItem>
             </ListGroup>
           </Col>
-          <Col lg='12' className='text-center pt-5'>
+          <Col lg='12' className='text-center'>
             <p className="copyright">Resident Management System - Test Assignment {year}</p>
           </Col>
         </Row>

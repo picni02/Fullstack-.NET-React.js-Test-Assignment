@@ -1,0 +1,17 @@
+.list-group-item {
+    border-radius: 8px;
+    margin-bottom: 10px;
+    transition: all 0.3s ease-in-out;
+}
+
+.list-group-item:hover {
+    background-color: #f8f9fa;
+}
+
+.btn {
+    min-width: 80px;
+}
+
+#isinside{
+    margin-right: 20% !important;
+}

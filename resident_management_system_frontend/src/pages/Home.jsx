@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { Row, Col, Card } from "reactstrap";
 import '../styles/Pages.css'
 import { BASE_URL } from '../utils/config';
-import { handleGenerateData } from "../services/apiService";
+import { handleGenerateData, handleTransferData } from "../services/apiService";
 
 const Home = () => {
     const navigate = useNavigate();
@@ -49,22 +50,33 @@ const Home = () => {
         <div className="container d-flex flex-column justify-content-center align-items-center text-center">
             <h1 className="mt-4 mb-4">Welcome to Resident Management System</h1>
             
-            <div className="d-flex flex-column gap-3">
+            <div className="d-flex flex-column gap-3 mb-4">
                 <button className="btn btn-primary" onClick={handleGenerateData}>Generate data</button>
+                <button className="btn btn-primary" onClick={handleTransferData}>Transfer data</button>
             </div>
-
+            <p>Data is usually transferred automatically every Monday at 0:00AM.</p>
             <h2 className="mt-5">Top 5 Buildings</h2>
-            <ul className="list-group mt-3">
+            <Row className="mt-3">
                 {topBuildings.length > 0 ? (
                     topBuildings.map((building, index) => (
-                        <li key={index} className="list-group-item">
-                            <b>Building Address:</b> {building.address}, <b>Event Count:</b> {building.eventCount}, <b>Share:</b> {building.sharePercentage}%
-                        </li>
+                        <Col key={index} md="4" className="mb-4">
+                            <Card className="p-3 shadow-sm">
+                                <h5>Building Address</h5>
+                                <p>{building.address}</p>
+                                <hr />
+                                <p><strong>Event Count:</strong> {building.eventCount}</p>
+                                <p><strong>Share:</strong> {building.sharePercentage}%</p>
+                            </Card>
+                        </Col>
                     ))
                 ) : (
-                    <li className="list-group-item">No data available</li>
+                    <Col>
+                        <Card className="p-3 shadow-sm">
+                            <p>No data available</p>
+                        </Card>
+                    </Col>
                 )}
-            </ul>
+            </Row>
 
             <div className="mt-5 w-50">
                 <h3>Check Residents Status</h3>
@@ -75,7 +87,7 @@ const Home = () => {
                     value={address} 
                     onChange={(e) => setAddress(e.target.value)}
                 />
-                <button className="btn btn-success mt-3" onClick={handleCheckResidentsStatus}>
+                <button className="btn btn-success mt-3 mb-3" onClick={handleCheckResidentsStatus}>
                     Check Residents
                 </button>
             </div>
@@ -83,15 +95,40 @@ const Home = () => {
             {residents && Object.keys(residents).length > 0 && (
                 <div className="mt-4">
                     <h4>Apartments at {address}</h4>
-                    <ul className="list-group">
-                        <li className="list-group-item">
-                            <b>Total residents:</b> {residents.totalResidents}, 
-                            <b> Inside Count:</b> {residents.insideCount}, 
-                            <b> Inside percentage:</b> {residents.insidePercentage}%, 
-                            <b> Outside count:</b> {residents.outsideCount},
-                            <b> Outside percentage:</b> {residents.outsidePercentage}%
-                        </li>
-                    </ul>
+                    <Row className="mt-3">
+                        <Col>
+                            <Card className="p-3 shadow-sm">
+                                <h5>Total Residents</h5>
+                                <p>{residents.totalResidents}</p>
+                            </Card>
+                        </Col>
+                        <Col>
+                            <Card className="p-3 shadow-sm">
+                                <h5>Inside Count</h5>
+                                <p>{residents.insideCount}</p>
+                            </Card>
+                        </Col>
+                        <Col>
+                            <Card className="p-3 shadow-sm">
+                                <h5>Inside Percentage</h5>
+                                <p>{residents.insidePercentage}%</p>
+                            </Card>
+                        </Col>
+                    </Row>
+                    <Row className="mt-3 mb-3">
+                        <Col>
+                            <Card className="p-3 shadow-sm">
+                                <h5>Outside Count</h5>
+                                <p>{residents.outsideCount}</p>
+                            </Card>
+                        </Col>
+                        <Col>
+                            <Card className="p-3 shadow-sm">
+                                <h5>Outside Percentage</h5>
+                                <p>{residents.outsidePercentage}%</p>
+                            </Card>
+                        </Col>
+                    </Row>
                 </div>
             )}
 

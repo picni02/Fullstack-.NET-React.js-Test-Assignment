@@ -49,7 +49,7 @@ namespace ResidentManagementSystem.Modules
                 }
             });
 
-            Get("/transferdata", async _ =>
+            Get("/transfer-data", async _ =>
             {
                 try
                 {

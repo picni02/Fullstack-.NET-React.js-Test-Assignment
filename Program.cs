@@ -47,7 +47,7 @@ class Program
             }
 
             // Pokretanje automatskog prenosa podataka svakog ponedjeljka u ponoć
-        //    _ = StartDataTransferScheduler(dataTransferService);
+            _ = StartDataTransferScheduler(dataTransferService);
 
             Console.ReadLine();
         }

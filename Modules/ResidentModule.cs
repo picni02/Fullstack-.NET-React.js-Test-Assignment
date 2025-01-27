@@ -18,6 +18,13 @@ namespace ResidentManagementSystem.Modules
         {
             _dbContext = dbContext;
 
+            After += ctx => {
+                ctx.Response.WithHeader("Access-Control-Allow-Origin", "*")
+                            .WithHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE")
+                            .WithHeader("Access-Control-Allow-Headers", "Content-Type");
+            };
+
+
             // GET all residents
             Get("/", _ =>
             {
@@ -31,6 +38,25 @@ namespace ResidentManagementSystem.Modules
                 }).ToList();
                 return Response.AsJson(residents);
             });
+
+            Get("/search", parameters =>
+            {
+                string query = (string)Request.Query["query"] ?? "";
+
+                var result = _dbContext.Residents
+                    .Where(r =>
+                        r.FirstName.Contains(query) ||
+                        r.LastName.Contains(query) ||
+                        r.ResidentId.ToString().Contains(query)
+                    )
+                    .ToList();
+
+                if (!result.Any())
+                    return HttpStatusCode.NotFound;
+
+                return Response.AsJson(result);
+            });
+
 
             // GET a resident by id
             Get("/{ResidentId:int}", parameters =>
@@ -49,14 +75,12 @@ namespace ResidentManagementSystem.Modules
 
                 Resident newResident = this.Bind<Resident>();
 
-                if (newResident.FirstName == null)
-                    newResident.FirstName = string.Empty; 
+                if (string.IsNullOrWhiteSpace(newResident.FirstName) || string.IsNullOrWhiteSpace(newResident.LastName))
+                {
+                    return HttpStatusCode.BadRequest;
+                }
 
-                if (newResident.LastName == null)
-                    newResident.LastName = string.Empty; 
-
-                if (parameters.IsInside != null)
-                    newResident.IsInside = Convert.ToBoolean(parameters.IsInside);
+                newResident.IsInside = newResident.IsInside ? true : false;
 
                 Console.WriteLine($"FirstName: {newResident.FirstName}, LastName: {newResident.LastName}, IsInside: {newResident.IsInside}");
 

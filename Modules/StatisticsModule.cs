@@ -23,10 +23,20 @@ namespace ResidentManagementSystem.Modules
                     .Select(a => a.ApartmentId)
                     .ToList();
 
+                if (!apartmentsIds.Any())
+                {
+                    return Response.AsJson(new { error = "No apartments found for the given address." }, HttpStatusCode.NotFound);
+                }
+
                 var residentIds = _dbContext.ResidentApartments
                     .Where(ra => apartmentsIds.Contains(ra.ApartmentId))
                     .Select(ra => ra.ResidentId) 
                     .ToList();
+
+                if (!residentIds.Any())
+                {
+                    return Response.AsJson(new { error = "No residents found for the given address." }, HttpStatusCode.NotFound);
+                }
 
                 var residents = _dbContext.Residents
                 .Where(r => residentIds.Contains(r.ResidentId))
@@ -41,8 +51,8 @@ namespace ResidentManagementSystem.Modules
                     totalResidents,
                     insideCount,
                     outsideCount,
-                    insidePercentage = totalResidents > 0 ? (int)((double)insideCount / totalResidents * 100) : 0,
-                    outsidePercentage = totalResidents > 0 ? (int)((double)outsideCount / totalResidents * 100) : 0
+                    insidePercentage = totalResidents > 0 ? (int)Math.Round((double)insideCount / totalResidents * 100, MidpointRounding.AwayFromZero) : 0,
+                    outsidePercentage = totalResidents > 0 ? (int)Math.Round((double)outsideCount / totalResidents * 100, MidpointRounding.AwayFromZero) : 0
                 });
             });
 
@@ -63,16 +73,48 @@ namespace ResidentManagementSystem.Modules
                     .Take(5)
                     .ToList();
 
+                if (!topBuildings.Any())
+                {
+                    return Response.AsJson(new { error = "No events found in the database." }, HttpStatusCode.NotFound);
+                }
+
                 int totalEvents = topBuildings.Sum(b => b.EventCount);
 
-                var response = topBuildings.Select(b => new
+                if (totalEvents == 0)
                 {
-                    b.Address,
-                    b.EventCount,
-                    SharePercentage = totalEvents > 0 ? (int)((double)b.EventCount / totalEvents * 100) : 0
-                }).ToList();
+                    return Response.AsJson(new { error = "Total event count is zero, cannot calculate percentages." }, HttpStatusCode.BadRequest);
+                }
 
-                return Response.AsJson(response);
+                var percentageList = topBuildings
+                    .Select(b => new
+                    {
+                        b.Address,
+                        b.EventCount,
+                        RawPercentage = (double)b.EventCount / totalEvents * 100
+                    })
+                    .OrderByDescending(b => b.RawPercentage)
+                    .ToList();
+
+                var roundedPercentages = percentageList
+                    .Select(b => new
+                    {
+                        b.Address,
+                        b.EventCount,
+                        SharePercentage = (int)Math.Round(b.RawPercentage, MidpointRounding.AwayFromZero)
+                    })
+                    .ToList();
+
+                int totalRounded = roundedPercentages.Sum(b => b.SharePercentage);
+                int difference = 100 - totalRounded;
+
+                roundedPercentages[0] = new
+                {
+                    roundedPercentages[0].Address,
+                    roundedPercentages[0].EventCount,
+                    SharePercentage = roundedPercentages[0].SharePercentage + difference
+                };
+
+                return Response.AsJson(roundedPercentages);
             });
         }
     }

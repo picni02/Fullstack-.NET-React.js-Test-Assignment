@@ -6,6 +6,7 @@ import Events from '../pages/Events'
 import Residents from '../pages/Residents'
 import ResidentApartments from '../pages/ResidentApartments'
 import Apartments from '../pages/Apartments'
+import EditResident from '../pages/EditResident'
 
 const Router = () => {
   return (
@@ -14,6 +15,7 @@ const Router = () => {
         <Route path='/home' element={<Home />} />
         <Route path='/events' element={<Events />} />
         <Route path='/residents' element={<Residents />} />
+        <Route path='/edit-resident/:id' element={<EditResident />} />
         <Route path='/apartments' element={<Apartments />} />
         <Route path='/residentapartments' element={<ResidentApartments />} />
     </Routes>

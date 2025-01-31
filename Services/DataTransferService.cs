@@ -41,7 +41,7 @@ namespace ResidentManagementSystem.Services
         public async Task TransferData()
         {
             Console.WriteLine("Starting data transfer to Elasticsearch...");
-            var batchSize = 10000;
+            var batchSize = 20000;
 
             var totalResidents = _appDbContext.Residents.Count();
             for(int i = 0; i < totalResidents; i+=batchSize)

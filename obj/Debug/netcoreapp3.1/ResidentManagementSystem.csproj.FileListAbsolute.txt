@@ -107,3 +107,7 @@ C:\Users\VSproj\ResidentManagementSystem\bin\Debug\netcoreapp3.1\MySqlConnector.
 C:\Users\VSproj\ResidentManagementSystem\bin\Debug\netcoreapp3.1\Newtonsoft.Json.dll
 C:\Users\VSproj\ResidentManagementSystem\bin\Debug\netcoreapp3.1\Pomelo.EntityFrameworkCore.MySql.dll
 C:\Users\VSproj\ResidentManagementSystem\bin\Debug\netcoreapp3.1\Pomelo.JsonObject.dll
+C:\Users\VSproj\ResidentManagementSystem\bin\Debug\netcoreapp3.1\Castle.Core.dll
+C:\Users\VSproj\ResidentManagementSystem\bin\Debug\netcoreapp3.1\Moq.dll
+C:\Users\VSproj\ResidentManagementSystem\bin\Debug\netcoreapp3.1\System.Diagnostics.EventLog.dll
+C:\Users\VSproj\ResidentManagementSystem\bin\Debug\netcoreapp3.1\runtimes\win\lib\netcoreapp2.0\System.Diagnostics.EventLog.dll

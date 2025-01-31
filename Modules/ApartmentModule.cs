@@ -33,9 +33,9 @@ namespace ResidentManagementSystem.Modules
                     .Take(pageSize)  
                     .Select(a => new
                     {
-                        ApartmentId = a.ApartmentId,
-                        ApartmentNumber = a.ApartmentNumber,
-                        Address = a.Address
+                        apartmentId = a.ApartmentId,
+                        apartmentNumber = a.ApartmentNumber,
+                        address = a.Address
                     })
                     .ToList();
 

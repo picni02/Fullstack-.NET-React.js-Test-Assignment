@@ -9,6 +9,7 @@ import Apartments from '../pages/Apartments'
 import EditResident from '../pages/EditResident'
 import EditApartment from '../pages/EditApartment'
 import EditEvent from '../pages/EditEvent'
+import EditResidentApartment from '../pages/EditResidentApartment'
 
 const Router = () => {
   return (
@@ -22,6 +23,7 @@ const Router = () => {
         <Route path='/apartments' element={<Apartments />} />
         <Route path='/edit-apartment/:id' element={<EditApartment />} />
         <Route path='/residentapartments' element={<ResidentApartments />} />
+        <Route path='/edit-resident-apartment/:id' element={<EditResidentApartment />} />
     </Routes>
   )
 }

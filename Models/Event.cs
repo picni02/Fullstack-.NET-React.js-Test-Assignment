@@ -14,5 +14,8 @@ namespace ResidentManagementSystem.Models
         public string EventType { get; set; } // Entry/Exit
         public int ApartmentId { get; set; }
 
+        public virtual Resident Resident { get; set; }
+        public virtual Apartment Apartment { get; set; }
+
     }
 }

@@ -63,7 +63,7 @@ namespace ResidentManagementSystem.Services
                 .RuleFor(ra => ra.ApartmentId, f => f.PickRandom(apartmentIds));
 
             var residentApartments = new List<ResidentApartment>();
-            var generatedResidentApartments = residentApartmentFaker.Generate(50000);
+            var generatedResidentApartments = residentApartmentFaker.Generate(100000);
             residentApartments.AddRange(generatedResidentApartments);
             for(int i = 0; i < residentApartments.Count; i+= 100)
             {
@@ -71,7 +71,7 @@ namespace ResidentManagementSystem.Services
                 await InsertResidentApartmentsBatchAsync(batch);
             }
             
-            Console.WriteLine("Generated 50 000 resident-apartments.");
+            Console.WriteLine("Generated 100 000 resident-apartments.");
 
             var events = new List<Event>();
             var eventFaker = new Faker<Event>()
@@ -80,7 +80,7 @@ namespace ResidentManagementSystem.Services
                 .RuleFor(e => e.ResidentId, f => f.PickRandom(residentIds))
                 .RuleFor(e => e.ApartmentId, f => f.PickRandom(apartmentIds));
 
-            var generatedEvents = eventFaker.Generate(100000);
+            var generatedEvents = eventFaker.Generate(1000000);
             events.AddRange(generatedEvents);
             for(int i = 0; i < events.Count;  i+= batchSize)
             {

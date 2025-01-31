@@ -33,15 +33,15 @@ const Residents = () => {
 
     useEffect(() => {
         if (searchQuery.trim() === "") {
-            setResidents([]); // Resetuj listu
-            setPage(1); // Resetuj paginaciju
-            fetchResidents(1); // Učitaj početne podatke
+            setResidents([]); 
+            setPage(1); 
+            fetchResidents(1); 
         }
     }, [searchQuery]);
 
     const fetchResidents = async (pageNumber) => {
         try {
-            const response = await fetch(`${BASE_URL}?page=${pageNumber}&pageSize=10`);
+            const response = await fetch(`${BASE_URL}?page=${pageNumber}&pageSize=20`);
             if (!response.ok) throw new Error("Failed to fetch residents");
     
             const data = await response.json();
@@ -53,7 +53,6 @@ const Residents = () => {
                 return [...prev, ...newResidents];
             });
     
-            // Sakrij dugme ako je manje rezultata nego što je pageSize
             if (data.length < 10) {
                 setHasMore(false);
             }
@@ -142,7 +141,7 @@ const Residents = () => {
         <Container>
             <Row>
                 <Col>
-                    <h1>Residents</h1>
+                    <h1 className="mt-4">Residents</h1>
                     <Form className="mb-4 p-3 border rounded">
                         <Row className="mb-3">
                             <Col>

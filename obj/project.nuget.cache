@@ -1,10 +1,11 @@
 {
   "version": 2,
-  "dgSpecHash": "46QJV+pVGkgm0M0L1YZlOxRlH9Fi4gr/NJTSpHpWoiJy1BE/ZbcqommBc8VwjBfuSdvOgSZWGSXM5mOefx+ERQ==",
+  "dgSpecHash": "f5nasfuscZu7O9V4LhTlh2IwNICr1MF3b/kH6hAR7YO+zowCXIgjtJRrNqfxQRGDvb4NYEEx4njozddWBkVKdg==",
   "success": true,
   "projectFilePath": "C:\\Users\\VSproj\\ResidentManagementSystem\\ResidentManagementSystem.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\PC\\.nuget\\packages\\bogus\\35.6.1\\bogus.35.6.1.nupkg.sha512",
+    "C:\\Users\\PC\\.nuget\\packages\\castle.core\\5.1.1\\castle.core.5.1.1.nupkg.sha512",
     "C:\\Users\\PC\\.nuget\\packages\\efcore.bulkextensions\\3.0.4\\efcore.bulkextensions.3.0.4.nupkg.sha512",
     "C:\\Users\\PC\\.nuget\\packages\\elasticsearch.net\\7.11.0\\elasticsearch.net.7.11.0.nupkg.sha512",
     "C:\\Users\\PC\\.nuget\\packages\\fastmember\\1.5.0\\fastmember.1.5.0.nupkg.sha512",
@@ -39,6 +40,7 @@
     "C:\\Users\\PC\\.nuget\\packages\\microsoft.win32.primitives\\4.3.0\\microsoft.win32.primitives.4.3.0.nupkg.sha512",
     "C:\\Users\\PC\\.nuget\\packages\\microsoft.win32.registry\\4.7.0\\microsoft.win32.registry.4.7.0.nupkg.sha512",
     "C:\\Users\\PC\\.nuget\\packages\\microsoft.win32.systemevents\\4.7.0\\microsoft.win32.systemevents.4.7.0.nupkg.sha512",
+    "C:\\Users\\PC\\.nuget\\packages\\moq\\4.20.72\\moq.4.20.72.nupkg.sha512",
     "C:\\Users\\PC\\.nuget\\packages\\mysqlconnector\\0.69.9\\mysqlconnector.0.69.9.nupkg.sha512",
     "C:\\Users\\PC\\.nuget\\packages\\nancy\\2.0.0\\nancy.2.0.0.nupkg.sha512",
     "C:\\Users\\PC\\.nuget\\packages\\nancy.hosting.self\\2.0.0\\nancy.hosting.self.2.0.0.nupkg.sha512",
@@ -88,6 +90,7 @@
     "C:\\Users\\PC\\.nuget\\packages\\system.console\\4.3.0\\system.console.4.3.0.nupkg.sha512",
     "C:\\Users\\PC\\.nuget\\packages\\system.diagnostics.debug\\4.3.0\\system.diagnostics.debug.4.3.0.nupkg.sha512",
     "C:\\Users\\PC\\.nuget\\packages\\system.diagnostics.diagnosticsource\\5.0.0\\system.diagnostics.diagnosticsource.5.0.0.nupkg.sha512",
+    "C:\\Users\\PC\\.nuget\\packages\\system.diagnostics.eventlog\\4.7.0\\system.diagnostics.eventlog.4.7.0.nupkg.sha512",
     "C:\\Users\\PC\\.nuget\\packages\\system.diagnostics.performancecounter\\4.7.0\\system.diagnostics.performancecounter.4.7.0.nupkg.sha512",
     "C:\\Users\\PC\\.nuget\\packages\\system.diagnostics.tools\\4.3.0\\system.diagnostics.tools.4.3.0.nupkg.sha512",
     "C:\\Users\\PC\\.nuget\\packages\\system.diagnostics.tracing\\4.3.0\\system.diagnostics.tracing.4.3.0.nupkg.sha512",

@@ -15,7 +15,7 @@ namespace ResidentManagementSystem.Services
             _dbContext = dbContext;
         }
 
-        public bool CheckAccess(Event residentEvent)
+        public bool CheckEventAccess(Event residentEvent)
         {
             // Provjera da li resident ima pristup ovom apartmanu
             bool hasAccess = _dbContext.ResidentApartments
@@ -27,6 +27,15 @@ namespace ResidentManagementSystem.Services
             //}
 
             return hasAccess;
+        }
+
+        public bool CheckResidentAccess(ResidentApartment residentApartment)
+        {
+            // Provjera da li resident već ima pristup ovom apartmanu
+            bool exist = _dbContext.ResidentApartments
+                .Any(ra => ra.ResidentId == residentApartment.ResidentId && ra.ApartmentId == residentApartment.ApartmentId);
+
+            return exist;
         }
     }
 }

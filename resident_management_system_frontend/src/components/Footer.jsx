@@ -15,17 +15,6 @@ const Footer = () => {
         </Row>
         <Row>
           <Col>
-            <ListGroup>
-              <ListGroupItem className='ps-3 border-0 d-flex align-items-center gap-3'>
-              <h6 className='mb-0 d-flex align-items-center gap-2'>
-              <b> <i>Adresa:</i></b>
-              
-              <p className='mb-0'>Fakultetska 1, Zenica</p>
-            </h6>
-              </ListGroupItem>
-            </ListGroup>
-          </Col>
-          <Col>
             <ListGroup className='footer__quick-links'>
                 <ListGroupItem className='ps-3 border-0 d-flex align-items-center gap-3'>
                   <h6 className='mb-0 d-flex align-items-center gap-2'>

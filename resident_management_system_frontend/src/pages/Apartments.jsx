@@ -42,7 +42,7 @@ const Apartments = () => {
 
     const fetchApartments = async (pageNumber) => {
         try {
-            const response = await fetch(`${BASE_URL}?page=${pageNumber}&pageSize=30`);
+            const response = await fetch(`${BASE_URL}?page=${pageNumber}&pageSize=20`);
             if (!response.ok) throw new Error("Failed to fetch apartments!");
     
             const data = await response.json();
@@ -142,7 +142,7 @@ const Apartments = () => {
         <Container>
             <Row>
                 <Col>
-                    <h1>Apartments</h1>
+                    <h1 className="mt-4">Apartments</h1>
                     <Form className="mb-4 p-3 border rounded">
                         <Row className="mb-3">
                             <Col>
@@ -162,7 +162,7 @@ const Apartments = () => {
                     <Form className="mb-4 p-3 border rounded">
                         <Row>
                             <Col>
-                                <Input type="text" placeholder="Search by name, ID..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+                                <Input type="text" placeholder="Search by ID, number, address..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
                             </Col>
                             <Col className="text-end">
                                 <Button color="primary" onClick={handleSearch}>Search</Button>

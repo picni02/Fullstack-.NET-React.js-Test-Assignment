@@ -6,10 +6,10 @@ import Footer from '../components/Footer';
 
 import "../styles/Layout.css"
 
-const Layout = () => {
+const Layout = ({ isLoading }) => {
   return (
     <>
-    <Header />
+    <Header isLoading={isLoading} />
     <div className="main-content">
       <Router />
     </div>

@@ -9,15 +9,17 @@ const SEARCH_APARTMENTS_URL = "http://localhost:5000/apartments/search";
 
 const Events = () => {
     const [events, setEvents] = useState([]);
-    const [newEvent, setNewEvent] = useState({ eventTime: formatDateToCustomFormat(new Date()), eventType: "Entry", residentId: "", apartmentId: "" });
+    const [newEvent, setNewEvent] = useState({ eventTime: formatDateToCustomFormat(new Date()), eventType: "Entry", residentId: "", firstName: "", lastName:"", apartmentId: "", apartmentNumber:"", address:"" });
     const [residentSearch, setResidentSearch] = useState("");
     const [apartmentSearch, setApartmentSearch] = useState("");
     const [residentResults, setResidentResults] = useState([]);
     const [apartmentResults, setApartmentResults] = useState([]);
+    const [searchQuery, setSearchQuery] = useState("");
     const [page, setPage] = useState(1);
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
     const [hasMore, setHasMore] = useState(true);
+    const [isSearching, setIsSearching] = useState(false);
 
     useEffect(() => {
         fetchEvents(page);
@@ -29,7 +31,22 @@ const Events = () => {
         }
     }, [events]);
 
-    // Debounce logika (čekaj 500ms prije slanja zahtjeva)
+    useEffect(() => {
+        const timeout = setTimeout(() => {
+            if (searchQuery.length >= 3) handleSearch();
+        }, 500);
+
+        return () => clearTimeout(timeout);
+    }, [searchQuery]);
+
+    useEffect(() => {
+        if (searchQuery.trim() === "") {
+            setEvents([]); 
+            setPage(1);
+            fetchEvents(1); 
+        }
+    }, [searchQuery]);
+
     useEffect(() => {
         const timeout = setTimeout(() => {
             if (residentSearch.length >= 3) fetchSearchResults(residentSearch, "resident");
@@ -48,20 +65,24 @@ const Events = () => {
         return () => clearTimeout(timeout);
     }, [apartmentSearch]);
 
-    const fetchEvents = async (pageNumber) => {
+    const fetchEvents = async (newPage = 1) => {
+        setIsSearching(false);
+        
         try {
-            const response = await fetch(`${BASE_URL}?page=${pageNumber}&pageSize=10`);
+            const response = await fetch(`${BASE_URL}?page=${newPage}&pageSize=20`);
             if (!response.ok) throw new Error("Failed to fetch events");
     
             const data = await response.json();
-    
+
             setEvents(prev => {
                 const newEvents = data.filter(even => 
                     !prev.some(ev => ev.eventId === even.eventId)
                 );
                 return [...prev, ...newEvents];
             });
-    
+            
+            setPage(newPage);
+            setHasMore(data.length === 20)
             // Sakrij dugme ako je manje rezultata nego što je pageSize
             if (data.length < 10) {
                 setHasMore(false);
@@ -90,6 +111,43 @@ const Events = () => {
             console.error("Error:", error);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleSearch = async (newPage = 1) => {
+        if (!searchQuery.trim()) {
+            alert("Please enter a search term.");
+            setEvents([]);
+            setPage(1);
+            fetchEvents(1);
+            return;
+        }
+        
+        setIsSearching(true);
+
+        try {
+            const response = await fetch(`${BASE_URL}/search?query=${encodeURIComponent(searchQuery)}&page=${newPage}&pageSize=20}`);
+            if (response.status === 404) {
+                if (newPage === 1) {
+                    alert("No events found.");
+                    setEvents([]);
+                }
+                setHasMore(false);
+                return;
+            }
+            if (!response.ok) throw new Error("Failed to search events");
+            const result = await response.json();
+            console.log("Search result:", result);
+            if (newPage === 1) {
+                setEvents(result.results);
+            } else {
+                setEvents([...events, ...result.results]);
+            }
+
+            setPage(newPage);
+            setHasMore(result.results.length === 20);
+        } catch (error) {
+            console.error("Error:", error);
         }
     };
 
@@ -133,7 +191,7 @@ const Events = () => {
             return;
         }
 
-        const updatedEvent = { ...newEvent, eventTime: formatDateToCustomFormat(new Date()) };
+        const updatedEvent = { ...newEvent, eventTime: formatDateToCustomFormat(new Date())};
 
         try {
             const response = await fetch(BASE_URL, {
@@ -145,7 +203,7 @@ const Events = () => {
             if(response.status === 401)
             {
                 const errorResponse = await response.json();
-                alert(`Resident ${newEvent.residentId} doesn't have access to apartment ${newEvent.apartmentId}!`);
+                alert(`Resident ${updatedEvent.residentId} doesn't have access to apartment ${updatedEvent.apartmentId}!`);
                 return;
             }
             if (!response.ok){
@@ -180,7 +238,7 @@ const Events = () => {
         <Container>
             <Row>
                 <Col>
-                    <h1>Events</h1>
+                    <h1 className="mt-4 pb-2">Events</h1>
                     <Form className="mb-4 p-3 border rounded">
                         <Row className="mb-3">    
                             <Col>
@@ -247,6 +305,17 @@ const Events = () => {
                             </Col>
                         </Row>
                     </Form>
+                    
+                    <Form className="mb-4 p-3 border rounded">
+                        <Row>
+                            <Col>
+                                <Input type="text" placeholder="Search by ID, resident ID, apartment ID..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+                            </Col>
+                            <Col className="text-end">
+                                <Button color="primary" onClick={handleSearch}>Search</Button>
+                            </Col>
+                        </Row>
+                    </Form>
 
                     <ListGroup className="mt-4">
                         {events.map((event, index) => (
@@ -254,8 +323,10 @@ const Events = () => {
                                 <div>
                                     <h5><b>ID:</b> {event.eventId}</h5>
                                     <h6><b>Resident ID:</b> {event.residentId}</h6>
+                                    <h6><b>Full name:</b> {event.firstName} {event.lastName}</h6>
                                     <h6><b>Apartment ID:</b> {event.apartmentId}</h6>
-                                    <p className="mb-0"><b>Time:</b> {new Date(event.eventTime).toLocaleString("en-GB", { timeZone: "Europe/Zagreb"})}</p>
+                                    <h6><b>Apartment number and address</b> {event.apartmentNumber}-{event.address}</h6>
+                                    <p className="mb-0"><b>Time:</b> {new Date(event.eventTime).toLocaleString("en-GB", { timeZone: "Europe/Sarajevo"})}</p>
                                     <p className="mb-0"><b>Type:</b> {event.eventType}</p>
                                 </div>
                                 <div>
@@ -266,7 +337,13 @@ const Events = () => {
                         ))}
                     </ListGroup>
                     {hasMore && events.length > 0 && (
-                        <Button color="secondary" className="mt-3" onClick={() => setPage(page + 1)}>Load More</Button>
+                        <Button 
+                            color="secondary" 
+                            className="mt-3" 
+                            onClick={() => isSearching ? handleSearch(page + 1) : fetchEvents(page + 1)}
+                        >
+                            Load More
+                        </Button>
                     )}
                 </Col>
             </Row>

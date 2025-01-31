@@ -1,16 +1,15 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { Row, Col, Card } from "reactstrap";
-import '../styles/Pages.css'
+import '../styles/Home.css'
 import { BASE_URL } from '../utils/config';
-import { handleGenerateData, handleTransferData } from "../services/apiService";
 
 const Home = () => {
-    const navigate = useNavigate();
     const [topBuildings, setTopBuildings] = useState([]);
     const [address, setAddress] = useState('');
     const [residents, setResidents] = useState([]);
     const [nextTransferTime, setNextTransferTime] = useState(null);
+    const [isLoading, setIsLoading] = useState(false);
+    const [activeButton, setActiveButton] = useState(null);
 
     useEffect(() => {
         fetchNextTransferTime();
@@ -62,8 +61,15 @@ const Home = () => {
 
         try {
             const response = await fetch(`${BASE_URL}/statistics/residents-status?address=${encodeURIComponent(address)}`);
-            if (!response.ok) throw new Error('Failed to fetch residents status');
+            
+            if(response.status === 404){
+                const errorData = await response.json();
+                setResidents(errorData.error || "No residents found for this address");
+                return;
+            }
 
+            if (!response.ok) throw new Error('Failed to fetch residents status');
+            
             const data = await response.json();
             console.log(data);
 
@@ -74,7 +80,73 @@ const Home = () => {
             }
         } catch (error) {
             console.error('Error fetching residents status:', error);
+            setResidents("Error fetching residents status");
         }
+    };
+
+    const handleTransferData = async () => {
+        setIsLoading(true);
+        setActiveButton("transfer");
+
+        try{
+            const response = await fetch(`${BASE_URL}/transfer-data`, { 
+                method: 'POST', 
+                headers: { 'Content-Type' : 'application/json' }
+            });
+            if(!response.ok){
+                throw new Error('Server returned an error response');
+            }
+    
+            const result = await response.json();
+    
+            if(result.error){
+                throw new Error(result.error);
+            }
+            
+        }catch(error)
+        {
+            console.error('Error transferring data:', error);
+            alert('Failed to transfer data. Please try again.');
+        }finally{
+            setIsLoading(false);
+            setActiveButton(null);
+            setTimeout(() => {
+                alert('Data transfer completed successfully!');
+            }, 500);
+        }
+        
+    };
+
+    const handleGenerateData = async () => {
+        setIsLoading(true);
+        setActiveButton("generate");
+        try{
+            const response = await fetch(`${BASE_URL}/generate-data`, { 
+                method: 'POST', 
+                headers: { 'Content-Type' : 'application/json' }
+            });
+            if(!response.ok){
+                throw new Error('Server returned an error response');
+            }
+    
+            const result = await response.json();
+    
+            if(result.error){
+                throw new Error(result.error);
+            }
+            
+        }catch(error)
+        {
+            console.error('Error generating data:', error);
+            alert('Failed to generate data. Please try again.');
+        }finally{
+            setIsLoading(false);
+            setActiveButton(null);
+            setTimeout(() => {
+                alert('Data generated successfully!');
+            }, 300);
+        }
+        
     };
 
     return (
@@ -86,9 +158,16 @@ const Home = () => {
             ) : (
                 <p>Loading next transfer time...</p>
             )}
+            
             <div className="d-flex flex-column gap-3 mb-4 pt-2">
-                <button className="btn btn-primary" onClick={handleGenerateData}>Generate data</button>
-                <button className="btn btn-primary" onClick={handleTransferData}>Transfer data</button>
+                <button className="btn btn-primary" onClick={handleGenerateData} disabled={isLoading}>{isLoading && activeButton === "generate" ? 'Generating data...' : 'Generate data'}</button>
+                <button className="btn btn-primary" onClick={handleTransferData} disabled={isLoading}>{isLoading && activeButton === "transfer" ? 'Transferring data...' : 'Transfer data'}</button>
+                {isLoading && (
+                    <div className="loading-indicator">
+                        <div className="spinner"></div> 
+                        <p className="mt-2">Processing, please wait...</p>
+                    </div>
+                )}
             </div>
             
             <h2 className="mt-5">Top 5 Buildings</h2>
@@ -123,7 +202,7 @@ const Home = () => {
                     value={address} 
                     onChange={(e) => setAddress(e.target.value)}
                 />
-                <button className="btn btn-success mt-3 mb-3" onClick={handleCheckResidentsStatus}>
+                <button className="btn btn-success mt-3 mb-3" onClick={handleCheckResidentsStatus} disabled={isLoading}>
                     Check Residents
                 </button>
             </div>

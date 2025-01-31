@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Bogus.DataSets;
+using Microsoft.EntityFrameworkCore;
 using Nancy;
 using Nancy.ModelBinding;
 using ResidentManagementSystem.Data;
@@ -33,16 +34,20 @@ namespace ResidentManagementSystem.Modules
                 if (pageSize < 1) pageSize = 20;
 
                 var events = _dbContext.Events
-                    .OrderBy(r => r.ResidentId) 
+                    .OrderByDescending(r => r.EventTime) 
                     .Skip((page - 1) * pageSize)  
                     .Take(pageSize)  
                     .Select(e => new
                     {
-                        EventId = e.EventId,
-                        EventTime = e.EventTime,
-                        ResidentId = e.ResidentId,
-                        EventType = e.EventType,
-                        ApartmentId = e.ApartmentId
+                        eventId = e.EventId,
+                        eventTime = e.EventTime,
+                        residentId = e.ResidentId,
+                        firstName = e.Resident.FirstName,
+                        lastName = e.Resident.LastName,
+                        eventType = e.EventType,
+                        apartmentId = e.ApartmentId,
+                        apartmentNumber = e.Apartment.ApartmentNumber,
+                        address = e.Apartment.Address,
                     })
                     .ToList();
 
@@ -64,19 +69,61 @@ namespace ResidentManagementSystem.Modules
             {
                 string query = (string)Request.Query["query"] ?? "";
 
-                var result = _dbContext.Events
+              //  int page = Request.Query["page"].HasValue ? (int)Request.Query["page"] : 1;
+                int page;
+                if (!int.TryParse(Request.Query["page"], out page) || page < 1)
+                {
+                    page = 1;
+                }
+
+                int pageSize;
+                if (!int.TryParse(Request.Query["pageSize"], out pageSize) || pageSize < 1)
+                {
+                    pageSize = 20;
+                }
+
+                if (page < 1) page = 1;
+                if (pageSize < 1) pageSize = 20;
+
+                var queryableEvents = _dbContext.Events
+                    .Include(e => e.Resident)  
+                    .Include(e => e.Apartment) 
                     .Where(e =>
                         e.ApartmentId.ToString().Contains(query) ||
                         e.ResidentId.ToString().Contains(query) ||
-                        e.EventId.ToString().Contains(query)
-                    )
+                        e.EventId.ToString().Contains(query) ||
+                        (e.Resident != null && (e.Resident.FirstName.Contains(query) || e.Resident.LastName.Contains(query))) ||
+                        (e.Apartment != null && (e.Apartment.ApartmentNumber.Contains(query) || e.Apartment.Address.Contains(query)))
+                    );
+
+
+                var result = queryableEvents
+                    .OrderByDescending(e => e.EventTime) 
+                    .Skip((page - 1) * pageSize)
+                    .Take(pageSize)
+                    .Select(e => new
+                    {
+                        eventId = e.EventId,
+                        eventTime = e.EventTime,
+                        residentId = e.ResidentId,
+                        firstName = e.Resident != null ? e.Resident.FirstName : "N/A",
+                        lastName = e.Resident != null ? e.Resident.LastName : "N/A",
+                        eventType = e.EventType,
+                        apartmentId = e.ApartmentId,
+                        apartmentNumber = e.Apartment != null ? e.Apartment.ApartmentNumber : "N/A",
+                        address = e.Apartment != null ? e.Apartment.Address : "N/A",
+                    })
                     .ToList();
 
                 if (!result.Any())
                     return HttpStatusCode.NotFound;
 
-                return Response.AsJson(result);
+                return Response.AsJson(new
+                {
+                    results = result
+                });
             });
+
 
             // POST add event
             Post("/", parameters =>
@@ -105,7 +152,7 @@ namespace ResidentManagementSystem.Modules
                 if (string.IsNullOrEmpty(newEvent.EventType))
                         newEvent.EventType = "EXIT";
 
-                if (!_accessObserver.CheckAccess(newEvent))
+                if (!_accessObserver.CheckEventAccess(newEvent))
                 {
                     return Response.AsJson(new { error = "Access unauthorized!" }, HttpStatusCode.Unauthorized);
                 }
@@ -128,7 +175,17 @@ namespace ResidentManagementSystem.Modules
 
                     _dbContext.SaveChanges();
                     Console.WriteLine($"Resident: {resident.FirstName} {resident.LastName} changed status to {resident.IsInside}.");
-                    return Response.AsJson(newEvent, HttpStatusCode.Created);
+                    return Response.AsJson(new {
+                        eventId = newEvent.EventId,
+                        eventTime = newEvent.EventTime,
+                        residentId = newEvent.ResidentId,
+                        firstName = newEvent.Resident.FirstName,
+                        lastName = newEvent.Resident.LastName,
+                        eventType = newEvent.EventType,
+                        apartmentId = newEvent.ApartmentId,
+                        apartmentNumber = newEvent.Apartment.ApartmentNumber,
+                        address = newEvent.Apartment.Address
+                    }, HttpStatusCode.Created);
                 }
                 catch (Exception ex)
                 {

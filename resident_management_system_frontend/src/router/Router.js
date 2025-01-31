@@ -7,6 +7,8 @@ import Residents from '../pages/Residents'
 import ResidentApartments from '../pages/ResidentApartments'
 import Apartments from '../pages/Apartments'
 import EditResident from '../pages/EditResident'
+import EditApartment from '../pages/EditApartment'
+import EditEvent from '../pages/EditEvent'
 
 const Router = () => {
   return (
@@ -14,9 +16,11 @@ const Router = () => {
         <Route path='/' element={<Navigate to = '/home' />} />
         <Route path='/home' element={<Home />} />
         <Route path='/events' element={<Events />} />
+        <Route path='/edit-event/:id' element={<EditEvent />} />
         <Route path='/residents' element={<Residents />} />
         <Route path='/edit-resident/:id' element={<EditResident />} />
         <Route path='/apartments' element={<Apartments />} />
+        <Route path='/edit-apartment/:id' element={<EditApartment />} />
         <Route path='/residentapartments' element={<ResidentApartments />} />
     </Routes>
   )

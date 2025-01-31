@@ -23,6 +23,21 @@ const Residents = () => {
         }
     }, [residents]);
     
+    useEffect(() => {
+        const timeout = setTimeout(() => {
+            if (searchQuery.length >= 3) handleSearch();
+        }, 500);
+
+        return () => clearTimeout(timeout);
+    }, [searchQuery]);
+
+    useEffect(() => {
+        if (searchQuery.trim() === "") {
+            setResidents([]); // Resetuj listu
+            setPage(1); // Resetuj paginaciju
+            fetchResidents(1); // Učitaj početne podatke
+        }
+    }, [searchQuery]);
 
     const fetchResidents = async (pageNumber) => {
         try {
@@ -86,6 +101,9 @@ const Residents = () => {
     const handleSearch = async () => {
         if (!searchQuery.trim()) {
             alert("Please enter a search term.");
+            setResidents([]);
+            setPage(1);
+            fetchResidents(1);
             return;
         }
     
@@ -159,17 +177,20 @@ const Residents = () => {
                     </Form>
 
                     <ListGroup className="mt-4">
-                        {residents.map((resident, index) => (
-                            <ListGroupItem key={resident.residentId || index} className="d-flex justify-content-between align-items-center p-3">
-                                <div>
-                                    <h5>{resident.firstName} {resident.lastName}</h5>
-                                    <p className="mb-0">{resident.isInside ? "Inside" : "Outside"}</p>
-                                </div>
-                                <div>
-                                    <Button color="warning" className="me-2" onClick={() => handleEdit(resident.residentId)}>Edit</Button>
-                                    <Button color="danger" onClick={() => handleDelete(resident.residentId)}>Delete</Button>
-                                </div>
-                            </ListGroupItem>
+                        {[...residents]
+                         //   .sort((a, b) => b.residentId - a.residentId)
+                            .map((resident, index) => (
+                                <ListGroupItem key={resident.residentId || index} className="d-flex justify-content-between align-items-center p-3">
+                                    <div>
+                                        <h5><b>ID:</b> {resident.residentId}</h5>
+                                        <h6><b>Full name:</b> {resident.firstName} {resident.lastName}</h6>
+                                        <p className="mb-0"><b>Status:</b> {resident.isInside ? "Inside" : "Outside"}</p>
+                                    </div>
+                                    <div>
+                                        <Button color="warning" className="me-2" onClick={() => handleEdit(resident.residentId)}>Edit</Button>
+                                        <Button color="danger" onClick={() => handleDelete(resident.residentId)}>Delete</Button>
+                                    </div>
+                                </ListGroupItem>
                         ))}
                     </ListGroup>
                     {hasMore && residents.length > 0 && (

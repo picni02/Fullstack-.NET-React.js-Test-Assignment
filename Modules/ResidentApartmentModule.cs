@@ -14,7 +14,7 @@ public class ResidentApartmentModule : NancyModule
         Get("/residents/{residentId}/apartments/{apartmentId}", parameters => GetResidentApartment(parameters.residentId, parameters.apartmentId));
         Post("/residents/{residentId}/apartments/{apartmentId}", parameters => AssignApartment(parameters.residentId, parameters.apartmentId));
         Put("/residents/{residentId}/apartments/{apartmentId}", parameters => UpdateResidentApartment(parameters.residentId, parameters.apartmentId));
-        Delete("/residents/{residentId}/apartments/{apartmentId}", parameters => DeleteApartment(parameters.residentId, parameters.apartmentId));
+        Delete("/residents/{residentId}/apartments/{apartmentId}", parameters => DeleteResidentApartment(parameters.residentId, parameters.apartmentId));
     }
 
     // GET: Retrieve all resident-apartment relationships
@@ -114,7 +114,7 @@ public class ResidentApartmentModule : NancyModule
     }
 
     // DELETE: Remove a resident from an apartment
-    private object DeleteApartment(int residentId, int apartmentId)
+    private object DeleteResidentApartment(int residentId, int apartmentId)
     {
         var residentApartment = _dbContext.ResidentApartments
             .FirstOrDefault(ra => ra.ResidentId == residentId && ra.ApartmentId == apartmentId);

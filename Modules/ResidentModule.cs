@@ -18,24 +18,30 @@ namespace ResidentManagementSystem.Modules
         {
             _dbContext = dbContext;
 
-            After += ctx => {
-                ctx.Response.WithHeader("Access-Control-Allow-Origin", "*")
-                            .WithHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE")
-                            .WithHeader("Access-Control-Allow-Headers", "Content-Type");
-            };
-
-
             // GET all residents
             Get("/", _ =>
             {
-                
-                var residents = _dbContext.Residents.ToList()
-                .Select(r => new Resident {
-                    ResidentId = r.ResidentId,
-                    FirstName = r.FirstName,
-                    LastName = r.LastName,
-                    IsInside = r.IsInside,
-                }).ToList();
+
+                int page = Request.Query["page"].HasValue ? (int)Request.Query["page"] : 1;
+                int pageSize = Request.Query["pageSize"].HasValue ? (int)Request.Query["pageSize"] : 20;
+
+                // Ako page ili pageSize nisu validni brojevi, koristimo default
+                if (page < 1) page = 1;
+                if (pageSize < 1) pageSize = 20;
+
+                var residents = _dbContext.Residents
+                    .OrderBy(r => r.ResidentId) 
+                    .Skip((page - 1) * pageSize)  
+                    .Take(pageSize) 
+                    .Select(r => new
+                    {
+                        ResidentId = r.ResidentId,
+                        FirstName = r.FirstName,
+                        LastName = r.LastName,
+                        IsInside = r.IsInside
+                    })
+                    .ToList();
+
                 return Response.AsJson(residents);
             });
 

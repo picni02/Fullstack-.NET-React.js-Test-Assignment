@@ -6,6 +6,7 @@ using ResidentManagementSystem.Models;
 using ResidentManagementSystem.Services;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Text;
 
 namespace ResidentManagementSystem.Modules
@@ -24,15 +25,27 @@ namespace ResidentManagementSystem.Modules
             Get("/", _ =>
             {
 
-                var events = _dbContext.Events.ToList()
-                .Select(e => new Event
-                {
-                    EventId = e.EventId,
-                    EventTime = e.EventTime,
-                    ResidentId = e.ResidentId,
-                    EventType = e.EventType,
-                    ApartmentId = e.ApartmentId,
-                }).ToList();
+                int page = Request.Query["page"].HasValue ? (int)Request.Query["page"] : 1;
+                int pageSize = Request.Query["pageSize"].HasValue ? (int)Request.Query["pageSize"] : 20;
+
+                // Ako page ili pageSize nisu validni brojevi, koristimo default
+                if (page < 1) page = 1;
+                if (pageSize < 1) pageSize = 20;
+
+                var events = _dbContext.Events
+                    .OrderBy(r => r.ResidentId) 
+                    .Skip((page - 1) * pageSize)  
+                    .Take(pageSize)  
+                    .Select(e => new
+                    {
+                        EventId = e.EventId,
+                        EventTime = e.EventTime,
+                        ResidentId = e.ResidentId,
+                        EventType = e.EventType,
+                        ApartmentId = e.ApartmentId
+                    })
+                    .ToList();
+
                 return Response.AsJson(events);
             });
 
@@ -47,14 +60,33 @@ namespace ResidentManagementSystem.Modules
                 return Response.AsJson(getEvent);
             });
 
+            Get("/search", parameters =>
+            {
+                string query = (string)Request.Query["query"] ?? "";
+
+                var result = _dbContext.Events
+                    .Where(e =>
+                        e.ApartmentId.ToString().Contains(query) ||
+                        e.ResidentId.ToString().Contains(query) ||
+                        e.EventId.ToString().Contains(query)
+                    )
+                    .ToList();
+
+                if (!result.Any())
+                    return HttpStatusCode.NotFound;
+
+                return Response.AsJson(result);
+            });
+
             // POST add event
             Post("/", parameters =>
             {
-                
+
                 Event newEvent = this.Bind<Event>();
 
                 var resident = _dbContext.Residents.Find(newEvent.ResidentId);
                 var apartment = _dbContext.Apartments.Find(newEvent.ApartmentId);
+                newEvent.EventType.ToUpper();
 
                 if (resident == null || apartment == null)
                 {
@@ -72,26 +104,30 @@ namespace ResidentManagementSystem.Modules
 
                 if (string.IsNullOrEmpty(newEvent.EventType))
                         newEvent.EventType = "EXIT";
+
+                if (!_accessObserver.CheckAccess(newEvent))
+                {
+                    return Response.AsJson(new { error = "Access unauthorized!" }, HttpStatusCode.Unauthorized);
+                }
+
                 try
                 {
-                    
-                    _accessObserver.CheckAccess(newEvent);
 
                     Console.WriteLine($"Event Time: {newEvent.EventTime}, Resident Id: {newEvent.ResidentId}, Event Type: {newEvent.EventType}, Apartment Id: {newEvent.ApartmentId}");
 
                     _dbContext.Events.Add(newEvent);
 
-                    if (newEvent.EventType == "ENTRY")
+                    if (newEvent.EventType.ToUpper() == "ENTRY")
                     {
                         resident.IsInside = true; // Ako je ENTRY, postavljanje IsInside na true (1)
                     }
-                    else if (newEvent.EventType == "EXIT")
+                    else if (newEvent.EventType.ToUpper() == "EXIT")
                     {
                         resident.IsInside = false; // Ako je EXIT, postavljanje IsInside na false (0)
                     }
 
                     _dbContext.SaveChanges();
-
+                    Console.WriteLine($"Resident: {resident.FirstName} {resident.LastName} changed status to {resident.IsInside}.");
                     return Response.AsJson(newEvent, HttpStatusCode.Created);
                 }
                 catch (Exception ex)

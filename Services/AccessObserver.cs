@@ -15,16 +15,18 @@ namespace ResidentManagementSystem.Services
             _dbContext = dbContext;
         }
 
-        public void CheckAccess(Event residentEvent)
+        public bool CheckAccess(Event residentEvent)
         {
             // Provjera da li resident ima pristup ovom apartmanu
             bool hasAccess = _dbContext.ResidentApartments
                 .Any(ra => ra.ResidentId == residentEvent.ResidentId && ra.ApartmentId == residentEvent.ApartmentId);
 
-            if (!hasAccess)
-            {
-                throw new Exception($"Resident {residentEvent.ResidentId} attempted to {residentEvent.EventType} apartment {residentEvent.ApartmentId} without access.");
-            }
+            //if (!hasAccess)
+            //{
+            //    throw new Exception($"Resident {residentEvent.ResidentId} attempted to {residentEvent.EventType} apartment {residentEvent.ApartmentId} without access.");
+            //}
+
+            return hasAccess;
         }
     }
 }

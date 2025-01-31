@@ -12,9 +12,11 @@ namespace ResidentManagementSystem.Modules
     public class StaticFileModule : NancyModule
     {
         private readonly GenerateDataService _generateDataService;
-        public StaticFileModule(GenerateDataService generateDataService)
+        private readonly DataTransferService _transferService;
+        public StaticFileModule(GenerateDataService generateDataService, DataTransferService dataTransferService)
         {
             _generateDataService = generateDataService;
+            _transferService = dataTransferService;
 
             Get("/", _ => 
             {
@@ -49,12 +51,20 @@ namespace ResidentManagementSystem.Modules
                 }
             });
 
-            Get("/transfer-data", async _ =>
+            Get("/transfer-data", _ =>
+            {
+                double timeUntilNextExecution = dataTransferService.GetTimeUntilNextMonday();
+                DateTime nextTransfer = DateTime.Now.AddMilliseconds(timeUntilNextExecution);
+
+                return Response.AsJson(nextTransfer);
+            });
+
+            Post("/transfer-data", async _ =>
             {
                 try
                 {
-                    var dataTransferService = new DataTransferService(new AppDbContext(), new ElasticSearchService());
-                    await dataTransferService.TransferData();
+                   // var dataTransferService = new DataTransferService(new AppDbContext(), new ElasticSearchService());
+                    await _transferService.TransferData();
                     return Response.AsJson(new { message = "Data transfer initiated successfully." });
                 }
                 catch(Exception ex)

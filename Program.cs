@@ -2,6 +2,7 @@
 using Nancy.Hosting.Self;
 using Nancy.TinyIoc;
 using ResidentManagementSystem.Data;
+using ResidentManagementSystem.Modules;
 using ResidentManagementSystem.Services;
 using System;
 
@@ -28,6 +29,7 @@ class Program
             container.Register<ElasticSearchService>().AsSingleton();
             container.Register<DataTransferService>().AsSingleton();
             container.Register<GenerateDataService>().AsSingleton();
+            container.Register<CorsModule>().AsSingleton();
 
             var elasticsearchService = container.Resolve<ElasticSearchService>();
             var dataTransferService = container.Resolve<DataTransferService>();

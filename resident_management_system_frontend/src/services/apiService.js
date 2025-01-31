@@ -30,7 +30,7 @@ export const handleGenerateData = async () => {
 export const handleTransferData = async () => {
     try{
         const response = await fetch(`${BASE_URL}/transfer-data`, { 
-            method: 'GET', 
+            method: 'POST', 
             headers: { 'Content-Type' : 'application/json' }
         });
         if(!response.ok){

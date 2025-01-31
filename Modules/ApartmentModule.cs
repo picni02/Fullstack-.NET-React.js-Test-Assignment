@@ -20,13 +20,27 @@ namespace ResidentManagementSystem.Modules
             Get("/", _ =>
             {
 
-                var apartments = _dbContext.Apartments.ToList()
-                .Select(a => new Apartment
-                {
-                    ApartmentId = a.ApartmentId,
-                    ApartmentNumber = a.ApartmentNumber,
-                    Address = a.Address
-                }).ToList();
+                int page = Request.Query["page"].HasValue ? (int)Request.Query["page"] : 1;
+                int pageSize = Request.Query["pageSize"].HasValue ? (int)Request.Query["pageSize"] : 20;
+
+                // Ako page ili pageSize nisu validni brojevi, koristimo default
+                if (page < 1) page = 1;
+                if (pageSize < 1) pageSize = 20;
+
+                var apartments = _dbContext.Apartments
+                    .OrderBy(a => a.ApartmentId) 
+                    .Skip((page - 1) * pageSize)  
+                    .Take(pageSize)  
+                    .Select(a => new
+                    {
+                        ApartmentId = a.ApartmentId,
+                        ApartmentNumber = a.ApartmentNumber,
+                        Address = a.Address
+                    })
+                    .ToList();
+
+               // Console.WriteLine($"Fetching apartments: Page {page}, PageSize {pageSize}");
+
                 return Response.AsJson(apartments);
             });
 
@@ -39,6 +53,24 @@ namespace ResidentManagementSystem.Modules
                     return HttpStatusCode.NotFound;
 
                 return Response.AsJson(getApartment);
+            });
+
+            Get("/search", parameters =>
+            {
+                string query = (string)Request.Query["query"] ?? "";
+
+                var result = _dbContext.Apartments
+                    .Where(a =>
+                        a.ApartmentNumber.Contains(query) ||
+                        a.Address.Contains(query) ||
+                        a.ApartmentId.ToString().Contains(query)
+                    )
+                    .ToList();
+
+                if (!result.Any())
+                    return HttpStatusCode.NotFound;
+
+                return Response.AsJson(result);
             });
 
             // POST add apartment

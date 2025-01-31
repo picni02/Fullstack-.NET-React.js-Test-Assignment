@@ -10,10 +10,34 @@ const Home = () => {
     const [topBuildings, setTopBuildings] = useState([]);
     const [address, setAddress] = useState('');
     const [residents, setResidents] = useState([]);
+    const [nextTransferTime, setNextTransferTime] = useState(null);
+
+    useEffect(() => {
+        fetchNextTransferTime();
+    }, []);
 
     useEffect(() => {
         fetchTopBuildings();
     }, []);
+
+    useEffect(() => {
+        if (!address.trim()) {
+            setResidents(null);
+        }
+    }, [address]);
+    
+    const fetchNextTransferTime = async () => {
+        try {
+            const response = await fetch(`${BASE_URL}/transfer-data`);
+            if (!response.ok) throw new Error("Failed to fetch transfer time!");
+
+            const data = await response.json();
+            console.log(data)
+            setNextTransferTime(new Date(data).toLocaleString("en-GB", { timeZone: "Europe/Zagreb"}));
+        } catch (error) {
+            console.error("Error fetching transfer time:", error);
+        }
+    };
 
     const fetchTopBuildings = async () => {
         try {
@@ -34,13 +58,20 @@ const Home = () => {
             return;
         }
 
+        setResidents(null);
+
         try {
             const response = await fetch(`${BASE_URL}/statistics/residents-status?address=${encodeURIComponent(address)}`);
             if (!response.ok) throw new Error('Failed to fetch residents status');
 
             const data = await response.json();
             console.log(data);
-            setResidents(data);
+
+            if (!data || Object.keys(data).length === 0) {
+                setResidents("No residents found for this address"); 
+            } else {
+                setResidents(data);
+            }
         } catch (error) {
             console.error('Error fetching residents status:', error);
         }
@@ -49,12 +80,17 @@ const Home = () => {
     return (
         <div className="container d-flex flex-column justify-content-center align-items-center text-center">
             <h1 className="mt-4 mb-4">Welcome to Resident Management System</h1>
-            
-            <div className="d-flex flex-column gap-3 mb-4">
+            <p>Data is usually transferred automatically every Monday at 0:00AM.</p>
+            {nextTransferTime ? (
+                <p>Next data transfer scheduled for: <strong>{nextTransferTime}</strong></p>
+            ) : (
+                <p>Loading next transfer time...</p>
+            )}
+            <div className="d-flex flex-column gap-3 mb-4 pt-2">
                 <button className="btn btn-primary" onClick={handleGenerateData}>Generate data</button>
                 <button className="btn btn-primary" onClick={handleTransferData}>Transfer data</button>
             </div>
-            <p>Data is usually transferred automatically every Monday at 0:00AM.</p>
+            
             <h2 className="mt-5">Top 5 Buildings</h2>
             <Row className="mt-3">
                 {topBuildings.length > 0 ? (
@@ -92,44 +128,50 @@ const Home = () => {
                 </button>
             </div>
 
-            {residents && Object.keys(residents).length > 0 && (
+            {residents && typeof residents === "string" ? (
                 <div className="mt-4">
-                    <h4>Apartments at {address}</h4>
-                    <Row className="mt-3">
-                        <Col>
-                            <Card className="p-3 shadow-sm">
-                                <h5>Total Residents</h5>
-                                <p>{residents.totalResidents}</p>
-                            </Card>
-                        </Col>
-                        <Col>
-                            <Card className="p-3 shadow-sm">
-                                <h5>Inside Count</h5>
-                                <p>{residents.insideCount}</p>
-                            </Card>
-                        </Col>
-                        <Col>
-                            <Card className="p-3 shadow-sm">
-                                <h5>Inside Percentage</h5>
-                                <p>{residents.insidePercentage}%</p>
-                            </Card>
-                        </Col>
-                    </Row>
-                    <Row className="mt-3 mb-3">
-                        <Col>
-                            <Card className="p-3 shadow-sm">
-                                <h5>Outside Count</h5>
-                                <p>{residents.outsideCount}</p>
-                            </Card>
-                        </Col>
-                        <Col>
-                            <Card className="p-3 shadow-sm">
-                                <h5>Outside Percentage</h5>
-                                <p>{residents.outsidePercentage}%</p>
-                            </Card>
-                        </Col>
-                    </Row>
+                    <h4>{residents}</h4>
                 </div>
+            ) : (
+                residents && Object.keys(residents).length > 0 && (
+                    <div className="mt-4">
+                        <h4>Apartments at {address}</h4>
+                        <Row className="mt-3">
+                            <Col>
+                                <Card className="p-3 shadow-sm">
+                                    <h5>Total Residents</h5>
+                                    <p>{residents.totalResidents}</p>
+                                </Card>
+                            </Col>
+                            <Col>
+                                <Card className="p-3 shadow-sm">
+                                    <h5>Inside Count</h5>
+                                    <p>{residents.insideCount}</p>
+                                </Card>
+                            </Col>
+                            <Col>
+                                <Card className="p-3 shadow-sm">
+                                    <h5>Inside Percentage</h5>
+                                    <p>{residents.insidePercentage}%</p>
+                                </Card>
+                            </Col>
+                        </Row>
+                        <Row className="mt-3 mb-3">
+                            <Col>
+                                <Card className="p-3 shadow-sm">
+                                    <h5>Outside Count</h5>
+                                    <p>{residents.outsideCount}</p>
+                                </Card>
+                            </Col>
+                            <Col>
+                                <Card className="p-3 shadow-sm">
+                                    <h5>Outside Percentage</h5>
+                                    <p>{residents.outsidePercentage}%</p>
+                                </Card>
+                            </Col>
+                        </Row>
+                    </div>
+                )
             )}
 
         </div>
